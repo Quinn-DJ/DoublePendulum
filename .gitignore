@@ -1,0 +1,16 @@
+# 先屏蔽所有文件
+*
+
+# 再放开需要保留的文件
+!*/
+!*.cpp
+!*.hpp
+!*.md
+!*.py
+!Makefile
+!*.ipynb
+!config
+!.gitignore
+!*.sh
+
+.conda
