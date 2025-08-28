@@ -8,8 +8,8 @@ DoublePendulum::DoublePendulum(const Config& cfg) : config(cfg) {
     theta2 = config.theta2;
     omega1 = config.omega1;
     omega2 = config.omega2;
-    
-    // 初始化old值用于Verlet算法
+
+    // Initialize old values for Verlet algorithm
     theta1_old = theta1;
     theta2_old = theta2;
     omega1_old = omega1;
@@ -22,8 +22,8 @@ Config DoublePendulum::loadConfig(const std::string& filename) {
     std::string line;
     
     if (!file.is_open()) {
-        std::cerr << "无法打开配置文件: " << filename << std::endl;
-        // 设置默认值
+        std::cerr << "Cannot open config file: " << filename << std::endl;
+        // Set default values
         cfg.L1 = cfg.L2 = 1.0;
         cfg.M1 = cfg.M2 = 1.0;
         cfg.G = 9.81;
@@ -36,7 +36,7 @@ Config DoublePendulum::loadConfig(const std::string& filename) {
     }
     
     while (std::getline(file, line)) {
-        // 跳过注释和空行
+        // Skip comments and empty lines
         if (line.empty() || line[0] == '#') continue;
         
         size_t pos = line.find('=');
@@ -45,13 +45,13 @@ Config DoublePendulum::loadConfig(const std::string& filename) {
         std::string key = line.substr(0, pos);
         std::string value = line.substr(pos + 1);
         
-        // 移除行内注释
+        // Remove inline comments
         size_t comment_pos = value.find('#');
         if (comment_pos != std::string::npos) {
             value = value.substr(0, comment_pos);
         }
         
-        // 移除前后空白字符
+        // Remove leading and trailing whitespace
         key.erase(0, key.find_first_not_of(" \t"));
         key.erase(key.find_last_not_of(" \t") + 1);
         value.erase(0, value.find_first_not_of(" \t"));
@@ -86,32 +86,56 @@ void DoublePendulum::calculateAcceleration(double& alpha1, double& alpha2) {
     double denom1 = (M1 + M2) * L1 - M2 * L1 * cos_delta * cos_delta;
     double denom2 = (L2 / L1) * denom1;
     
-    // 计算第一个摆的角加速度
+    // Calculate angular acceleration of first pendulum
     alpha1 = (-M2 * L1 * omega1 * omega1 * sin_delta * cos_delta
               + M2 * g * sin(theta2) * cos_delta
               + M2 * L2 * omega2 * omega2 * sin_delta
               - (M1 + M2) * g * sin(theta1)) / denom1;
     
-    // 计算第二个摆的角加速度
+    // Calculate angular acceleration of second pendulum
     alpha2 = (-M2 * L2 * omega2 * omega2 * sin_delta * cos_delta
               + (M1 + M2) * g * sin(theta1) * cos_delta
               + (M1 + M2) * L1 * omega1 * omega1 * sin_delta
               - (M1 + M2) * g * sin(theta2)) / denom2;
 }
 
+/*
+ * Verlet Integration Algorithm Implementation
+ * ==========================================
+ * 
+ * The Verlet algorithm is a numerical method for integrating equations of motion.
+ * It provides better stability and energy conservation compared to Euler methods.
+ * 
+ * Position update formula:
+ *   $\theta(t+\Delta t) = 2\theta(t) - \theta(t-\Delta t) + \alpha(t)(\Delta t)^2$
+ * 
+ * Velocity calculation (central difference):
+ *   $\omega(t) = \frac{\theta(t+\Delta t) - \theta(t-\Delta t)}{2\Delta t}$
+ * 
+ * Where:
+ *   $\theta$ = angular position
+ *   $\omega$ = angular velocity  
+ *   $\alpha$ = angular acceleration
+ *   $\Delta t$ = time step
+ */
+
 void DoublePendulum::verletStep() {
     double alpha1, alpha2;
     calculateAcceleration(alpha1, alpha2);
     
-    // Verlet算法更新位置
+    // Update positions using Verlet algorithm
+    // Mathematical formula: $\theta(t+\Delta t) = 2\theta(t) - \theta(t-\Delta t) + \alpha(t)(\Delta t)^2$
+    // where $\alpha(t)$ is the angular acceleration at time $t$
     double theta1_new = 2 * theta1 - theta1_old + alpha1 * config.dt * config.dt;
     double theta2_new = 2 * theta2 - theta2_old + alpha2 * config.dt * config.dt;
     
-    // 更新角速度（使用中心差分）
+    // Update angular velocities (using central difference)
+    // Mathematical formula: $\omega(t) = \frac{\theta(t+\Delta t) - \theta(t-\Delta t)}{2\Delta t}$
+    // This provides better numerical stability than forward/backward differences
     omega1 = (theta1_new - theta1_old) / (2 * config.dt);
     omega2 = (theta2_new - theta2_old) / (2 * config.dt);
     
-    // 更新位置
+    // Update positions
     theta1_old = theta1;
     theta2_old = theta2;
     theta1 = theta1_new;
@@ -132,35 +156,47 @@ void DoublePendulum::simulateAndOutputData(const std::string& dataFilename) {
     double t = 0.0;
     int steps = static_cast<int>(config.totalTime / config.dt);
     
-    // 打开数据输出文件
+    // Open data output file
     std::ofstream dataFile(dataFilename);
     if (!dataFile.is_open()) {
-        std::cerr << "无法创建数据文件: " << dataFilename << std::endl;
+        std::cerr << "Cannot create data file: " << dataFilename << std::endl;
         return;
     }
     
-    // 写入文件头，包含配置信息
-    dataFile << "# 双摆模拟数据\n";
+    // Write file header with configuration information
+    dataFile << "# Double Pendulum Simulation Data\n";
     dataFile << "# L1=" << config.L1 << " L2=" << config.L2 << "\n";
     dataFile << "# M1=" << config.M1 << " M2=" << config.M2 << "\n"; 
     dataFile << "# G=" << config.G << " dt=" << config.dt << "\n";
-    dataFile << "# 数据格式: time x1 y1 x2 y2\n";
+    dataFile << "# Data format: time x1 y1 x2 y2\n";
     
-    std::cout << "开始双摆模拟并输出数据..." << std::endl;
-    std::cout << "总步数: " << steps << std::endl;
+    // Progress tracking variables
+    int lastReportedProgress = -1;
+    
+    std::cout << "Starting simulation..." << std::endl;
+    std::cout << "Total steps: " << steps << std::endl;
     
     for (int i = 0; i < steps; i++) {
-        if (i > 0) {  // 跳过第一步，因为需要old值
+        // Calculate and display progress percentage
+        int currentProgress = static_cast<int>((i * 100.0) / steps);
+        if (currentProgress > lastReportedProgress) {
+            lastReportedProgress = currentProgress;
+            std::cout << "\rProgress: " << currentProgress << "%" << std::flush;
+        }
+        
+        if (i > 0) {  // Skip first step as it needs old values
             verletStep();
         } else {
-            // 第一步使用欧拉方法初始化
+            // First step uses Euler method for initialization
+            // Mathematical formula: $\theta(t-\Delta t) = \theta(t) - \omega(t)\Delta t + \frac{1}{2}\alpha(t)(\Delta t)^2$
+            // This provides the "old" position needed for Verlet algorithm
             double alpha1, alpha2;
             calculateAcceleration(alpha1, alpha2);
             theta1_old = theta1 - omega1 * config.dt + 0.5 * alpha1 * config.dt * config.dt;
             theta2_old = theta2 - omega2 * config.dt + 0.5 * alpha2 * config.dt * config.dt;
         }
         
-        // 每100步输出一次数据
+        // Output data every 100 steps
         if (i % 100 == 0) {
             Point p1 = getPendulum1Position();
             Point p2 = getPendulum2Position();
@@ -170,6 +206,9 @@ void DoublePendulum::simulateAndOutputData(const std::string& dataFilename) {
         t += config.dt;
     }
     
+    // Display completion message
+    std::cout << "\rProgress: 100%" << std::endl;
+    std::cout << "Simulation completed! Data saved to: " << dataFilename << std::endl;
+    
     dataFile.close();
-    std::cout << "模拟完成！数据已保存到: " << dataFilename << std::endl;
 }

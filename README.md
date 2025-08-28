@@ -1,169 +1,221 @@
-# 双摆模拟程序
+# Double Pendulum Simulation
 
-这是一个使用Verlet算法实现的双摆（Double Pendulum）模拟程序，用C++编写。
+A double pendulum simulation program implemented using the Verlet integration algorithm, written in C++ with Python visualization capabilities.
 
-## 功能特性
+## Features
 
-- **Verlet算法**：使用高精度的Verlet积分算法进行数值求解
-- **可配置参数**：通过配置文件设置初始条件和物理参数
-- **轨迹可视化**：生成BMP格式的图像，显示两个摆球的运动轨迹
-- **Python可视化**：使用matplotlib生成高质量的PNG图像和GIF动画
-- **多配置支持**：支持多个不同的初始条件配置
-- **自动环境管理**：自动创建和管理Python虚拟环境
+- **Verlet Integration Algorithm**: High-precision Verlet integration for numerical solution of the double pendulum system
+- **Configurable Parameters**: Flexible configuration of initial conditions and physical parameters via config files
+- **Data Output**: C++ program outputs time-series data to text files
+- **Python Visualization**: Generate high-quality PNG static images and GIF animations using matplotlib
+- **Automatic Environment Management**: Automatically create and manage conda virtual environments
+- **Chaos System Demonstration**: Showcase the chaotic behavior characteristics of double pendulum systems
 
-## 文件结构
+## Project Structure
 
 ```
-programme/DoublePendulum/
+DoublePendulum/
 ├── include/
-│   ├── Bitmap.hpp          # BMP图像处理头文件
-│   └── DoublePendulum.hpp  # 双摆类头文件
+│   └── DoublePendulum.hpp  # Double pendulum class header
 ├── src/
-│   ├── Bitmap.cpp          # BMP图像处理实现
-│   ├── DoublePendulum.cpp  # 双摆类实现
-│   └── main.cpp            # 主程序
+│   ├── DoublePendulum.cpp  # Double pendulum class implementation
+│   └── main.cpp            # Main program entry point
 ├── config/
-│   └── config              # 配置文件
-├── setup_env.sh            # 环境设置脚本
-├── visualize.py            # Python可视化脚本
-├── requirements.txt        # Python依赖列表
-└── Makefile                # 编译配置
+│   └── config              # Configuration file
+├── setup_env.sh            # Conda environment setup script
+├── visualize.py            # Python visualization script
+└── Makefile                # Build configuration
 ```
 
-## 编译与运行
+## Quick Start
 
-### 环境设置
-首次使用前，需要设置Python环境：
+### 1. Environment Setup
+Before first use, set up the conda environment and Python dependencies:
 ```bash
-make setup
-# 或者
 ./setup_env.sh
 ```
 
-### 编译程序
+### 2. Compile Program
 ```bash
-make
+make gcc
 ```
 
-### C++程序运行
+### 3. Run Simulation
 ```bash
-# 使用默认配置（BMP输出）
+# Run C++ program to generate data
 make run
 
-# 使用配置2
-make run2
-
-# 数据输出模式
-make data
-make data2
-```
-
-### Python可视化
-```bash
-# 生成数据并创建静态图
-make full
-
-# 生成数据并创建动画
-make full-anim
-
-# 仅生成静态图（需要先有数据文件）
+# Generate static trajectory plot
 make plot
 
-# 仅生成动画（需要先有数据文件）
+# Generate animation
 make animate
+
+# One-click: generate data and static plot
+make all
 ```
 
-### 清理文件
+## Configuration File
+
+The configuration file `config/config` uses key-value pairs to define physical parameters and simulation settings for the double pendulum system:
+
+```
+L1=1.0          # Length of first pendulum (m)
+L2=1.0          # Length of second pendulum (m) 
+M1=1.0          # Mass of first pendulum bob (kg)
+M2=1.0          # Mass of second pendulum bob (kg)
+G=9.8           # Gravitational acceleration (m/s²)
+THETA1=0.0      # Initial angle of first pendulum (radians)
+THETA2=0.0      # Initial angle of second pendulum (radians)
+OMEGA1=3.0      # Initial angular velocity of first pendulum (rad/s)
+OMEGA2=0.0      # Initial angular velocity of second pendulum (rad/s)
+DT=0.00001      # Time step (s)
+TOTAL_TIME=10.0 # Total simulation time (s)
+```
+
+### Parameter Description
+- **Physical Parameters**: L1, L2 are pendulum lengths; M1, M2 are pendulum bob masses; G is gravitational acceleration
+- **Initial Conditions**: THETA1, THETA2 are initial angles; OMEGA1, OMEGA2 are initial angular velocities
+- **Numerical Parameters**: DT is time step (affects accuracy and speed); TOTAL_TIME is total simulation duration
+
+## Program Output
+
+### C++ Program Output
+The C++ program reads the configuration file, runs the double pendulum simulation, and outputs results to a data file (default: `pendulum_data.txt`) in the following format:
+```
+# Configuration info: L1=1.00 L2=1.00 M1=1.00 M2=1.00
+time x1_coord y1_coord x2_coord y2_coord
+0.000000 0.000000 -1.000000 0.000000 -2.000000
+0.000010 0.000030 -0.999999 0.000060 -1.999998
+...
+```
+
+### Python Visualization Output
+The Python script can generate two types of visualizations:
+
+1. **Static Trajectory Plot** (PNG format)
+   - Shows complete motion trajectories of both pendulum bobs
+   - Red trajectory: First pendulum bob
+   - Blue trajectory: Second pendulum bob
+   - Includes starting points, pivot point, and final pendulum rod positions
+
+2. **Animation** (GIF format)
+   - Dynamic display of real-time double pendulum motion
+   - Includes pendulum rods, bobs, and trajectory trails
+   - Adjustable frame rate and trail length
+
+## Algorithm Principles
+
+### Verlet Integration Algorithm
+The program uses the Verlet algorithm to solve the double pendulum equations of motion. This algorithm has the following advantages:
+- **Time Symmetry**: Better numerical stability
+- **Energy Conservation**: Energy remains relatively stable during long-term integration
+- **High Precision**: Second-order accuracy numerical integration method
+
+Algorithm steps:
+1. **Position Update**: `θ(t+dt) = 2*θ(t) - θ(t-dt) + α(t)*dt²`
+2. **Velocity Update**: `ω(t) = [θ(t+dt) - θ(t-dt)] / (2*dt)`
+
+### Double Pendulum System Dynamics
+The double pendulum is a nonlinear dynamical system with two degrees of freedom. The equations of motion derived from Lagrangian mechanics include:
+- **Gravitational Effects**: Gravitational influence on both pendulum bobs
+- **Constraint Forces**: Rigid body constraints of pendulum rods
+- **Coupling Effects**: Interactions between the two pendulum bobs
+
+Angular acceleration calculations involve complex trigonometric functions and coupling terms, reflecting the system's nonlinear characteristics.
+
+## Chaotic Behavior Characteristics
+
+The double pendulum system is a classic chaotic system with the following features:
+- **Sensitivity to Initial Conditions**: Small changes in initial conditions lead to drastically different long-term behavior
+- **Unpredictability**: Long-term behavior cannot be precisely predicted
+- **Fractal Trajectories**: Forms complex fractal structures in phase space
+- **Quasi-periodic Motion**: Exhibits quasi-periodic or chaotic motion under certain parameters
+
+By changing initial angles or angular velocities, you can observe the transition from regular oscillation to complete chaos.
+
+## System Requirements
+
+### C++ Compilation Environment
+- **Compiler**: C++11 standard compatible compiler (e.g., GCC 4.8+)
+- **Build Tools**: GNU Make
+- **Operating System**: Linux, macOS, or Windows (using WSL)
+
+### Python Environment
+- **Python Version**: 3.9 or higher
+- **Package Manager**: Conda (Miniconda or Anaconda recommended)
+- **Dependencies**:
+  - `matplotlib`: For graphics plotting and animation generation
+  - `numpy`: For numerical computation and data processing
+
+*Note: Python dependencies are automatically installed to a local conda environment via the `setup_env.sh` script*
+
+## Usage Tips
+
+### Parameter Tuning Recommendations
+1. **Time Step (DT)**:
+   - Smaller values (e.g., 0.00001): High precision but slower computation
+   - Larger values (e.g., 0.01): Faster computation but potentially unstable
+   - Recommended range: 0.0001 - 0.001
+
+2. **Initial Condition Experiments**:
+   - Small angles: Approximates linear system, regular oscillation
+   - Large angles: Obvious nonlinear effects, possible chaos
+   - Different initial velocities: Generate different types of motion patterns
+
+3. **Simulation Time**:
+   - Short time (<5s): Observe basic motion patterns
+   - Long time (10-30s): Observe chaotic behavior and trajectory complexity
+
+### Troubleshooting
+- **Compilation Failure**: Ensure g++ and make tools are installed
+- **Python Environment Issues**: Re-run `./setup_env.sh`
+- **Empty Data File**: Check configuration file format and parameter validity
+- **Animation Generation Failure**: Ensure sufficient disk space, GIF files can be large
+
+## Make Command Reference
+
+| Command | Function | Description |
+|---------|----------|-------------|
+| `make gcc` | Compile C++ program | Generate executable `double_pendulum` |
+| `make run` | Run simulation | Generate data file using default configuration |
+| `make plot` | Static plot | Generate PNG trajectory plot from data file |
+| `make animate` | Animation | Generate GIF animation from data file |
+| `make all` | Complete workflow | Compile → Run → Generate static plot |
+| `make clean` | Clean | Delete all generated files and conda environment |
+| `make help` | Help | Show all available commands |
+
+## Example Results
+
+### Configuration Example: Small Angle Oscillation
 ```bash
-make clean  # 清理所有生成的文件和Python环境
+# Configuration: THETA1=0.5, THETA2=0.3, OMEGA1=0, OMEGA2=0
+# Result: Regular elliptical trajectories, quasi-periodic motion
 ```
 
-### 帮助信息
+### Configuration Example: Large Angle Chaos
 ```bash
-make help   # 显示所有可用的make命令
+# Configuration: THETA1=3.0, THETA2=2.0, OMEGA1=1, OMEGA2=1  
+# Result: Complex fractal trajectories, typical chaotic behavior
 ```
 
-## 配置文件格式
+## Project Extensions
 
-配置文件采用键值对格式，支持注释（以#开头）：
+Possible feature extensions to consider:
+- Add damping effects (air resistance, friction)
+- Implement comparison of different numerical integration algorithms
+- Add phase space plots and Poincaré section analysis
+- Support batch processing of multiple initial conditions
+- Add energy conservation monitoring and analysis
 
-```
-# 物理参数
-L1=1.0          # 第一个摆的长度(m)
-L2=1.0          # 第二个摆的长度(m)
-M1=1.0          # 第一个球的质量(kg)
-M2=1.0          # 第二个球的质量(kg)
-G=9.81          # 重力加速度(m/s²)
+## License
 
-# 初始条件
-THETA1=1.5      # 第一个摆的初始角度(弧度)
-THETA2=1.0      # 第二个摆的初始角度(弧度)
-OMEGA1=0.0      # 第一个摆的初始角速度(rad/s)
-OMEGA2=0.0      # 第二个摆的初始角速度(rad/s)
+This project is licensed under the MIT License.
 
-# 模拟参数
-DT=0.01         # 时间步长(s)
-TOTAL_TIME=20.0 # 总模拟时间(s)
-WIDTH=800       # 图像宽度(像素)
-HEIGHT=800      # 图像高度(像素)
-SCALE=200       # 缩放因子
-```
+## Contributing
 
-## 输出说明
+Issues and Pull Requests are welcome to improve this project!
 
-### C++程序输出（BMP格式）
-程序会生成一个BMP格式的图像文件，其中：
-- **黑色背景**：图像背景
-- **红色轨迹**：第一个摆球的运动轨迹
-- **浅蓝色轨迹**：第二个摆球的运动轨迹
-- **白色线条**：摆杆的最终位置
-- **彩色圆点**：摆球的最终位置
+---
 
-### Python可视化输出
-使用matplotlib生成的高质量图像：
-- **PNG静态图**：清晰的轨迹可视化
-- **GIF动画**：动态展示双摆运动过程
-- **可自定义**：颜色、尺寸、时间范围等
-
-## 算法说明
-
-### Verlet积分算法
-
-程序使用Verlet算法来求解双摆的运动方程：
-
-1. **位置更新**：`x(t+dt) = 2*x(t) - x(t-dt) + a(t)*dt²`
-2. **速度计算**：`v(t) = [x(t+dt) - x(t-dt)] / (2*dt)`
-
-### 双摆运动方程
-
-双摆系统的拉格朗日方程推导出的角加速度：
-
-- θ₁和θ₂分别是两个摆的角度
-- 考虑了两个摆球间的相互作用力
-- 包含重力、离心力和科里奥利力的影响
-
-## 混沌行为
-
-双摆系统是经典的混沌系统，对初始条件极其敏感。微小的初始条件变化可能导致完全不同的轨迹，这在生成的图像中可以清楚地观察到。
-
-## 依赖项
-
-### C++部分
-- C++11或更高版本编译器
-- make工具
-
-### Python部分（自动管理）
-- Python 3.9
-- matplotlib（可视化库）
-- numpy（数值计算库）
-
-*注意：Python依赖会通过`setup_env.sh`脚本自动安装*
-
-## 注意事项
-
-1. **首次运行**：请先执行`make setup`设置Python环境
-2. **时间步长**：dt不宜过大，建议0.001-0.01之间
-3. **模拟时间**：过长可能导致数值误差累积
-4. **图像尺寸**：需要根据摆长调整缩放因子
-5. **磁盘空间**：BMP文件和GIF动画可能较大
-6. **环境清理**：使用`make clean`可以删除包括Python环境在内的所有文件
+**Languages**: [English](README.md) | [中文](README_CN.md)

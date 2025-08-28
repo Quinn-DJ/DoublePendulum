@@ -6,13 +6,13 @@
 #include <cmath>
 
 struct Config {
-    double L1, L2;       // 摆长
-    double M1, M2;       // 质量
-    double G;            // 重力加速度
-    double theta1, theta2;   // 初始角度
-    double omega1, omega2;   // 初始角速度
-    double dt;           // 时间步长
-    double totalTime;    // 总时间
+    double L1, L2;       // Pendulum lengths
+    double M1, M2;       // Masses
+    double G;            // Gravitational acceleration
+    double theta1, theta2;   // Initial angles
+    double omega1, omega2;   // Initial angular velocities
+    double dt;           // Time step
+    double totalTime;    // Total simulation time
 };
 
 struct Point {
@@ -31,19 +31,19 @@ private:
 public:
     DoublePendulum(const Config& cfg);
     
-    // 加载配置文件
+    // Load configuration file
     static Config loadConfig(const std::string& filename);
     
-    // Verlet算法计算下一步
+    // Calculate next step using Verlet algorithm
     void verletStep();
     
-    // 计算加速度
+    // Calculate acceleration
     void calculateAcceleration(double& alpha1, double& alpha2);
     
-    // 运行模拟并输出数据到文件
+    // Run simulation and output data to file
     void simulateAndOutputData(const std::string& dataFilename);
     
-    // 获取球的位置
+    // Get ball positions
     Point getPendulum1Position();
     Point getPendulum2Position();
 };
