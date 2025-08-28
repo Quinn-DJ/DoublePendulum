@@ -48,8 +48,11 @@ make run
 # 生成静态轨迹图
 make plot
 
-# 生成动画
+# 生成动画（逐帧保存方式）
 make animate
+
+# 生成动画并保留帧文件
+make animate-keep
 
 # 一键生成数据和静态图
 make all
@@ -103,6 +106,13 @@ Python脚本可生成两种类型的可视化：
    - 动态展示双摆的实时运动
    - 包含摆杆、摆球和轨迹尾迹
    - 可调节帧率和轨迹长度
+   
+3. **动画创建模式**
+   - 使用逐帧模式创建高质量动画
+   - 帧文件临时存储在 `output/` 目录中
+   - 可选择保留帧文件用于检查或后处理
+   - 文件命名格式: `frame_XXXXXX.png`
+   - 更好的内存管理和性能控制
 
 ## 算法原理
 
@@ -147,6 +157,7 @@ Python脚本可生成两种类型的可视化：
 - **依赖包**：
   - `matplotlib`：用于图形绘制和动画生成
   - `numpy`：用于数值计算和数据处理
+  - `PIL (Pillow)`：用于逐帧模式的图像处理和GIF生成
 
 *注意：Python依赖会通过`setup_env.sh`脚本自动安装到本地conda环境中*
 
@@ -172,6 +183,8 @@ Python脚本可生成两种类型的可视化：
 - **Python环境问题**：重新运行`./setup_env.sh`
 - **数据文件为空**：检查配置文件格式和参数有效性
 - **动画生成失败**：确保有足够磁盘空间，GIF文件可能较大
+- **逐帧模式问题**：检查PIL/Pillow是否已安装；可使用`make animate`作为替代方案
+- **单独帧文件**：使用`--keep-frames`选项保留帧文件以便手动处理
 
 ## Make命令详解
 
@@ -180,7 +193,9 @@ Python脚本可生成两种类型的可视化：
 | `make gcc` | 编译C++程序 | 生成可执行文件`double_pendulum` |
 | `make run` | 运行模拟 | 使用默认配置生成数据文件 |
 | `make plot` | 静态图 | 根据数据文件生成PNG轨迹图 |
-| `make animate` | 动画 | 根据数据文件生成GIF动画 |
+| `make animate` | 动画（传统模式） | 使用matplotlib生成GIF动画 |
+| `make animate-frames` | 动画（逐帧模式） | 保存单独帧文件后生成GIF |
+| `make animate-frames-keep` | 动画（保留帧） | 逐帧模式且保留所有帧文件 |
 | `make all` | 完整流程 | 编译→运行→生成静态图 |
 | `make clean` | 清理 | 删除所有生成文件和conda环境 |
 | `make help` | 帮助 | 显示所有可用命令 |

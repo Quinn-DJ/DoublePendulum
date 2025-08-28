@@ -28,6 +28,9 @@ private:
     double theta1_old, theta2_old;
     double omega1_old, omega2_old;
     
+    // Normalize angle to [-π, π] range
+    double normalizeAngle(double angle);
+    
 public:
     DoublePendulum(const Config& cfg);
     
@@ -43,9 +46,16 @@ public:
     // Run simulation and output data to file
     void simulateAndOutputData(const std::string& dataFilename);
     
+    // Run simulation and output both position and angle data
+    void simulateAndOutputAllData(const std::string& positionFilename, const std::string& angleFilename);
+    
     // Get ball positions
     Point getPendulum1Position();
     Point getPendulum2Position();
+    
+    // Get current angles
+    double getTheta1() const { return theta1; }
+    double getTheta2() const { return theta2; }
 };
 
 #endif

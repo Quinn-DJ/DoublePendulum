@@ -48,8 +48,11 @@ make run
 # Generate static trajectory plot
 make plot
 
-# Generate animation
+# Generate animation (frame-by-frame mode)
 make animate
+
+# Generate animation and keep frame files
+make animate-keep
 
 # One-click: generate data and static plot
 make all
@@ -102,7 +105,34 @@ The Python script can generate two types of visualizations:
 2. **Animation** (GIF format)
    - Dynamic display of real-time double pendulum motion
    - Includes pendulum rods, bobs, and trajectory trails
-   - Adjustable frame rate and trail length
+   - Uses frame-by-frame generation for better control and memory efficiency
+   - Frame files temporarily saved to `output/` directory during generation
+   - Option to keep frame files for inspection or post-processing
+
+## Frame-by-Frame Animation Mode
+```bash
+# Generate animation (automatically removes frame files)
+make animate
+
+# Generate animation and keep frame files
+make animate-keep
+
+# Or use Python directly
+python visualize.py pendulum_data.txt --animate -o output.gif
+python visualize.py pendulum_data.txt --animate --keep-frames -o output.gif
+```
+Generates individual PNG frames in the `output/` directory, then combines them into a GIF. Provides:
+- Better quality control
+- Option to keep individual frames
+- More customization possibilities
+
+### Keep Frame Files
+```bash
+make animate-frames-keep
+# or
+python visualize.py pendulum_data.txt --animate --frame-mode --keep-frames -o output.gif
+```
+Same as frame-by-frame mode but preserves individual frame files in the `output/` directory for further processing.
 
 ## Algorithm Principles
 
@@ -147,6 +177,7 @@ By changing initial angles or angular velocities, you can observe the transition
 - **Dependencies**:
   - `matplotlib`: For graphics plotting and animation generation
   - `numpy`: For numerical computation and data processing
+  - `PIL (Pillow)`: For image processing and GIF creation in frame-by-frame mode
 
 *Note: Python dependencies are automatically installed to a local conda environment via the `setup_env.sh` script*
 
@@ -172,6 +203,8 @@ By changing initial angles or angular velocities, you can observe the transition
 - **Python Environment Issues**: Re-run `./setup_env.sh`
 - **Empty Data File**: Check configuration file format and parameter validity
 - **Animation Generation Failure**: Ensure sufficient disk space, GIF files can be large
+- **Frame-by-Frame Mode Issues**: Check that PIL/Pillow is installed; use `make animate` as fallback
+- **Individual Frame Files**: Use `--keep-frames` option to preserve frames for manual processing
 
 ## Make Command Reference
 
@@ -180,7 +213,8 @@ By changing initial angles or angular velocities, you can observe the transition
 | `make gcc` | Compile C++ program | Generate executable `double_pendulum` |
 | `make run` | Run simulation | Generate data file using default configuration |
 | `make plot` | Static plot | Generate PNG trajectory plot from data file |
-| `make animate` | Animation | Generate GIF animation from data file |
+| `make animate` | Animation (frame-by-frame) | Generate GIF animation using frame-by-frame mode |
+| `make animate-keep` | Animation (keep frames) | Generate GIF and keep individual frame files |
 | `make all` | Complete workflow | Compile → Run → Generate static plot |
 | `make clean` | Clean | Delete all generated files and conda environment |
 | `make help` | Help | Show all available commands |
